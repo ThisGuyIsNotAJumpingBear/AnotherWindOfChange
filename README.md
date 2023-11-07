@@ -1,3 +1,8 @@
+# Project
+
+To create tweets sorted by years object, run `split_data.py`, the pickle file should be in `data/sorted_tweets.pkl`
+
+
 # TempoWiC - An Evaluation Benchmark for Detecting Meaning Shift in Social Media
 
 This repository contains the starting kit for the TempoWiC Shared Task for EvoNLP: The First Workshop on Ever Evolving NLP, co-located with EMNLP 2022.
