@@ -5,6 +5,8 @@ import numpy as np
 import pickle
 from sklearn import metrics
 from utils import get_target_words
+from pearson import load_annotator_labels
+from scipy.stats import pearsonr
 
 def cosine_dist(v1, v2):
     return 1 - metrics.pairwise.cosine_similarity(v1.reshape(1, -1), v2.reshape(1, -1))[0][0]
@@ -61,12 +63,12 @@ def run(year1, year2):
 
     result = orthogonal(mat1, mat2, scale=True, translate=True)
     # display_procrutes_result(result)
-
+    a_op = np.dot(result.new_a, result.t)
     cosine_distances = {}
     for target in target_words:
         try:
             idx = intersect.index(target)
-            cosine_distances[target] = cosine_dist(result.new_a[idx], result.new_b[idx])
+            cosine_distances[target] = cosine_dist(a_op[idx], result.new_b[idx])
         except:
             pass
             # print(f"target word {target} is not found in the intersect of both corpora")
@@ -78,7 +80,20 @@ def main():
 
     for year1, year2 in years:
         cd = run(year1, year2)
-        print(len(cd.keys()))
+        
+        labels = load_annotator_labels()
+
+        sgns_vec = []
+        annotator_vec = []
+
+        for key in cd.keys():
+            sgns_vec.append(float(cd[key]))
+            annotator_vec.append(float(labels[key]))
+
+        
+        pearson, p_value = pearsonr(sgns_vec, annotator_vec)
+        print(pearson)
+        print(p_value)
 
 if __name__ == '__main__':
     main()

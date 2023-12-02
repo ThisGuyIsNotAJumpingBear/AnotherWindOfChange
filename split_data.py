@@ -2,8 +2,21 @@
 import json 
 from collections import defaultdict
 import pickle
+import csv
+
 
 files = ['data/test-codalab-10k.data.jl', 'data/train.data.jl', 'data/trial.data.jl', 'data/validation.data.jl']
+label_files = ['data/test.gold.tsv', 'data/train.labels.tsv', 'data/trial.gold.tsv', 'data/validation.labels.tsv']
+
+
+def load_labels():
+    labels = {}
+    for file in label_files:
+        with open(file) as fd:
+            rd = csv.reader(fd, delimiter="\t")
+            for row in rd:
+                labels[row[0]] = row[1]
+    return labels
 
 def load_instances(fn):
 
@@ -48,11 +61,16 @@ def assert_tweet_in_correct_key(date_dict):
 
 def main():
     date_dict = defaultdict(list)
+    labels = load_labels()
 
     for file in files:
         instances = load_instances(file)
         for data in instances:
             tweet1, tweet2 = pop_dicts(data)
+            if data["id"] in labels.keys():
+                label = labels[data['id']]
+                tweet1["label"], tweet2["label"] = label, label
+                print(tweet1)
             tweet1_year, tweet2_year = extract_year(tweet1), extract_year(tweet2)
             date_dict[tweet1_year].append(tweet1)
             date_dict[tweet2_year].append(tweet2)
@@ -86,7 +104,7 @@ def get_target_words_per_year():
     
 if __name__ == "__main__":
     main()
-    get_target_words_per_year()
+    # get_target_words_per_year()
 
 
 
