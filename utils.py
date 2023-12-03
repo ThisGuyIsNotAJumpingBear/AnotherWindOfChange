@@ -1,5 +1,6 @@
 import pickle
 import json
+import csv
 
 def open_pickle_file(path):
     with open(path, 'rb') as fp:
@@ -22,3 +23,22 @@ def load_instances():
                 instances.append(json.loads(jl_str))
     
     return instances
+
+def load_labels():
+    label_files = ['data/test.gold.tsv', 'data/train.labels.tsv', 'data/trial.gold.tsv', 'data/validation.labels.tsv']
+    labels = {}
+    for file in label_files:
+        with open(file) as fd:
+            rd = csv.reader(fd, delimiter="\t")
+            for row in rd:
+                labels[row[0]] = row[1]
+    return labels
+
+def load_annotator_labels():
+    labels = {}
+    with open("data/annotator.tsv") as fd:
+        rd = csv.reader(fd, delimiter=" ")
+        for row in rd:
+            labels[row[0]] = row[1]
+
+    return labels

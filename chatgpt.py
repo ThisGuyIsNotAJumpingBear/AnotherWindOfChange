@@ -49,13 +49,7 @@ def prompt_gpt(prompt_obj, context):
     # have to sleep to make sure openai limits are not reached
     time.sleep(2)
     return {"id": prompt_obj["id"], "response": response.choices[0].message.content, "label": prompt_obj["label"]}
-
-def open_pickle(path):
-    with open(path, 'rb') as fp:
-        return pickle.load(fp)
     
-
-
 def create_prompt(data_entry):
     tweet1 = data_entry["tweet1"]["text"]
     tweet2 = data_entry["tweet2"]["text"]
@@ -77,6 +71,7 @@ def create_qa_prompt(data_entry):
     word = data_entry["word"]
     date1 = data_entry["tweet1"]["date"]
     date2 =  data_entry['tweet2']["date"]
+
 
     return f"Tweet-1: {tweet1} Date: {date1} Tweet-2: {tweet2} Date: {date2} Question: Is the meaning of {word} different in the last 2 tweets?"
 
@@ -129,22 +124,19 @@ def main():
 
     partition = len(prompts) // num_procs
 
+
     pooling_partition_arr = []
     for i in range(num_procs):
         if i == num_procs-1:
             pooling_partition_arr.append((prompts, i * partition, len(prompts)))
         else:
             pooling_partition_arr.append((prompts, i * partition, (i+1) * partition))
-    
 
-    print(pooling_partition_arr)
         
     pool = Pool(num_procs)
     results = pool.starmap(parallel_prompt_gpt, pooling_partition_arr)
     pool.close()
     pool.join()
-    print(results)
-    print(len(results))
 
     with open('data/gpt3.5_answers_change.pkl', 'wb') as fp:
         pickle.dump(results, fp)
@@ -154,31 +146,8 @@ def main():
         print(chatgpt_answers)
     
 
-def get_accuracy():
-    with open('data/gpt3.5_answers_qa.pkl', 'rb') as fp:
-        chatgpt_answers = pickle.load(fp)
-    
-    count = 0
-    total_count = 0
-    for para_lst in chatgpt_answers:
-        for response in para_lst:
-            if response["response"] != "1" and response["response"] != "0":
-                print("error")
-            elif response["response"] == response["label"]:
-                count += 1
-            
-            total_count += 1
-    print(count, total_count)
-    return count / total_count
-    
-
 if __name__ == "__main__":
-    # main()
-    with open('data/gpt3.5_answers_change.pkl', 'rb') as fp:
-        chatgpt_answers = pickle.load(fp)
-
-    acc = get_accuracy()
-    print(acc)
+    main()
         
 
     
