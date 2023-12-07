@@ -103,8 +103,8 @@ def get_target_words_per_year():
         print(len(date_dict[string]))
     
 if __name__ == "__main__":
-    main()
-    # get_target_words_per_year()
+    # main()
+    get_target_words_per_year()
 
 
 

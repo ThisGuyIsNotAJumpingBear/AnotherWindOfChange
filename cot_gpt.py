@@ -100,7 +100,21 @@ def main():
     with open('data/gpt3.5_cot.pkl', 'rb') as fp:
         chatgpt_answers = pickle.load(fp)
         print(chatgpt_answers)
+
+def parse_cot():
+    with open('data/gpt3.5_cot.pkl', 'rb') as fp:
+        chatgpt_answers = pickle.load(fp)
+
+    f = open('cot_responses.txt', 'w')
+
+    for core_result in chatgpt_answers:
+        for answer in core_result:
+            f.write(f"{answer['response']} {answer['label']} \n")
+            f.write("-" * 80)
+            f.write("\n")
+    f.close()
+
     
 
 if __name__ == "__main__":
-    main()
+    parse_cot()

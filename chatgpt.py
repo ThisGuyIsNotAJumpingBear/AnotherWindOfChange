@@ -111,6 +111,7 @@ def parallel_prompt_gpt(prompts, start, end):
 def main():
     num_procs = 4
     prompts = prep_dataset(create_qa_prompt)
+    print(len(prompts))
 
     gpt4 = False
     if gpt4:
