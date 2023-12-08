@@ -16,7 +16,7 @@ Run `sgns.ipynb`.
 #### BERT
 Run `bert.ipynb`. We recommend running this on a gpu as we initialize a hugging face model.
 #### LLMs
-We use multiprocessing to parallelize the api requests to openai. Code for this can be found in `gpt.py`. However, we do not recommend running this file as you would need to create your own `.env` file, and change the openai organization id to your own in line `13` of `gpt.py`. All responses from gpt4 have been saved in `\data` under `gpt4_answers_no_date.pkl`, `gpt4_answers_qiq.pkl`, `gpt4_answers_with_date.pkl`.
+We use multiprocessing to parallelize the api requests to openai. Code for this can be found in `gpt.py`. However, we do not recommend running this file as you would need to create your own `.env` file, and change the openai organization id to your own in line `13` of `gpt.py`. All responses from gpt4 have been saved in `/data` under `gpt4_answers_no_date.pkl`, `gpt4_answers_qiq.pkl`, `gpt4_answers_with_date.pkl`.
 
 To run the evaluations of these models, run `gpt.ipynb`.
 
