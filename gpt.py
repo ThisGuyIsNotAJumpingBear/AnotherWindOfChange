@@ -4,7 +4,6 @@ from multiprocessing import Pool
 import os
 import time
 import pickle
-import json
 from tqdm import tqdm
 import csv
 import numpy as np
@@ -15,21 +14,16 @@ client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], organization="org-6u1yKGMu
 
 context_with_date = ''' 
     Given two tweets, their dates and a target word in the form of "### Tweet1: ... Date: ... ### Tweet2: ... Date: ... ### Target Word: ...", 
-    Tell me whether the meaning of the target word is different in the two tweets. Furthermore, only respond with 1 if it is a yes and 0 if it is a no. Do not explain.
+    Tell me whether the meaning of the target word is different in the two tweets. Furthermore, only respond with 0 if it is a yes and 1 if it is a no. Do not explain.
 '''
 
-context = '''
+context_no_date = '''
     Given two tweets and a target word in the form of "### Tweet1: ... ### Tweet2: ... ### Target Word: ...", 
-    Tell me whether the meaning of the target word is different in the two tweets. Furthermore, only respond with 1 if it is a yes and 0 if it is a no. Do not explain.
+    Tell me whether the meaning of the target word is different in the two tweets. Furthermore, only respond with 0 if it is a yes and 1 if it is a no. Do not explain.
 ''' 
 context_qa = '''
 You are given two tweets with their respective dates of creation and a question in the format of Tweet-1: ... Tweet-2: ... Question: ...
-Answer the question with 1 if it is a yes and 0 if it is a no. Do not explain.
-'''
-
-context_qa_amount_change = '''
-You are given two tweets with their respective dates of creation and a question in the format of Tweet-1: ... Tweet-2: ... Question: ...
-Answer the question with a float number within the range of 0 to 1 where 1 is yes and 0 is no. Do not explain.
+Answer the question with 0 if it is a yes and 1 if it is a no. Do not explain.
 '''
     
 def prompt_gpt(prompt_obj, context):
@@ -37,7 +31,7 @@ def prompt_gpt(prompt_obj, context):
     chatCompletion does not allow batched prompts unfortuantely.
     """
 
-    response = client.chat.completions.create(model="gpt-4-1106-preview",
+    response = client.chat.completions.create(model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": f"{context}"},
         {"role": "user", "content": f"{prompt_obj['prompt']}"},
@@ -97,23 +91,33 @@ def prep_dataset(create_prompt_func):
     
     return gpt_prompts
 
-def parallel_prompt_gpt(prompts, start, end):
+def parallel_prompt_gpt(prompts, context, start, end):
     core_prompts = prompts[start:end]
 
     chatgpt_answers = []
     pbar = tqdm(total=len(core_prompts))
     for prompt in core_prompts:
-        chatgpt_answers.append(prompt_gpt(prompt, context_qa_amount_change))
+        chatgpt_answers.append(prompt_gpt(prompt, context))
         pbar.update(1)
     
     return chatgpt_answers
 
-def main():
-    num_procs = 4
-    prompts = prep_dataset(create_qa_prompt)
-    print(len(prompts))
+def main(mode="qa", outpath='data/gpt3.5_answers_qa.pkl', gpt4=False):
 
-    gpt4 = False
+    if mode == 'no_date':
+        prompt_func = create_prompt
+        context = context_no_date
+    elif mode == "with_date":
+        prompt_func = create_prompt_with_date
+        context = context_with_date
+    else:
+        prompt_func = create_qa_prompt
+        context = context_qa
+
+
+    num_procs = 4
+    prompts = prep_dataset(prompt_func)
+
     if gpt4:
         idx_arr = np.random.choice(np.arange(len(prompts)), size=200, replace=False)
         scaled_down_prompts = []
@@ -124,14 +128,15 @@ def main():
         prompts = scaled_down_prompts
 
     partition = len(prompts) // num_procs
+    print(f"partitions among cores: {partition}")
 
 
     pooling_partition_arr = []
     for i in range(num_procs):
         if i == num_procs-1:
-            pooling_partition_arr.append((prompts, i * partition, len(prompts)))
+            pooling_partition_arr.append((prompts, context, i * partition, len(prompts)))
         else:
-            pooling_partition_arr.append((prompts, i * partition, (i+1) * partition))
+            pooling_partition_arr.append((prompts, context, i * partition, (i+1) * partition))
 
         
     pool = Pool(num_procs)
@@ -139,16 +144,21 @@ def main():
     pool.close()
     pool.join()
 
-    with open('data/gpt3.5_answers_change.pkl', 'wb') as fp:
+    with open(outpath, 'wb') as fp:
         pickle.dump(results, fp)
     
-    with open('data/gpt3.5_answers_change.pkl', 'rb') as fp:
+    with open(outpath, 'rb') as fp:
         chatgpt_answers = pickle.load(fp)
         print(chatgpt_answers)
     
 
 if __name__ == "__main__":
-    main()
+    main('qa', 'data/gpt3.5_answers_qa.pkl')
+    main('no_date', 'data/gpt3.5_answers_no_date.pkl')
+    main('with_date', 'data/gpt3.5_answers_with_date.pkl')
+
+
+
         
 
     

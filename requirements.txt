@@ -1,0 +1,15 @@
+numpy
+transformers
+torch 
+jupyter 
+ipykernel 
+scipy
+tqdm 
+scikit-learn
+pandas
+nltk
+seaborn 
+openai 
+matplotlib
+python-dotenv
+gensim

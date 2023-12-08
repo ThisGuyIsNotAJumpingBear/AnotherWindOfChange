@@ -70,7 +70,6 @@ def main():
             if data["id"] in labels.keys():
                 label = labels[data['id']]
                 tweet1["label"], tweet2["label"] = label, label
-                print(tweet1)
             tweet1_year, tweet2_year = extract_year(tweet1), extract_year(tweet2)
             date_dict[tweet1_year].append(tweet1)
             date_dict[tweet2_year].append(tweet2)
@@ -80,6 +79,7 @@ def main():
     assert_tweet_in_correct_key(date_dict)
 
     with open('data/sorted_tweets.pkl', 'wb') as fp:
+        print('yearly sorted tweets saved to data/sorted_tweets.pkl')
         pickle.dump(date_dict, fp)
     
     with open('data/sorted_tweets.pkl', 'rb') as fp:
@@ -90,7 +90,7 @@ def get_target_words_per_year():
     with open('data/target_words.pkl', 'rb') as fp:
         target_words = pickle.load(fp)
 
-    print(len(target_words))
+    print(f"total number of target words: {len(target_words)}")
 
     years = [("2019", "2020"), ("2020", "2021")]
 
@@ -100,10 +100,10 @@ def get_target_words_per_year():
 
     for year1, year2 in years:
         string = f"target_word_{year1}_{year2}"
-        print(len(date_dict[string]))
+        print(f"target_words in years {year1}-{year2}: {len(date_dict[string])}")
     
 if __name__ == "__main__":
-    # main()
+    main()
     get_target_words_per_year()
 
 

@@ -4,9 +4,7 @@ from multiprocessing import Pool
 import os
 import time
 import pickle
-import json
 from tqdm import tqdm
-import csv
 import numpy as np
 from utils import load_instances, load_labels
 
@@ -112,9 +110,7 @@ def parse_cot():
             f.write(f"{answer['response']} {answer['label']} \n")
             f.write("-" * 80)
             f.write("\n")
-    f.close()
-
-    
+    f.close()  
 
 if __name__ == "__main__":
     parse_cot()
