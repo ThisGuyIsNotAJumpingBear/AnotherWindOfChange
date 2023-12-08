@@ -10,7 +10,7 @@ def main():
     for year in years:
         target_words = save_target_words(year)
 
-        k = 12
+        k = 5
         model = gensim.models.Word2Vec(
             sg=1, # skipgram
             hs=0, # negative sampling
@@ -34,8 +34,8 @@ def main():
 
         #if normalize
         # if is_len:
-        #     # L2-normalize vectors
-        #     model.init_sims(replace=True)
+        # L2-normalize vectors
+        model.init_sims(replace=True)
 
         # # Save the vectors and the model
         outpath = f'model_files/sngs_{year}'
